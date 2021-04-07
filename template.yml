@@ -17,17 +17,54 @@ Metadata:
           default: "Application Configuration"
         Parameters:
           - AppName
+      - Label:
+          default: "Amazon DynamoDB Configuration"
+        Parameters:
+          - WebsocketConnectionsTableNameSuffix
+          - ReadCapacityUnits
+          - WriteCapacityUnits
     ParameterLabels:
       AppName:
         default: Application Name
+      ReadCapacityUnits:
+        default: Read Capacity Units
+      WriteCapacityUnits:
+        default: Write Capacity Units
+      WebsocketConnectionsTableNameSuffix:
+        default: Websocket Connections Table Name Suffix
 
 
 Parameters:
   AppName:
-    Description: >
-      The name of the application
     Type: String
     Default: apigw-http-api-lambda
+    Description: >
+      The name of the application
+  WebsocketConnectionsTableNameSuffix:
+    Type: String
+    Default: 'websocket_connections'
+    Description: >
+      (Required) The suffix of the name of the Amazon DynamoDB table where connection identifiers 
+      will be stored. The table name will be prefixed by the Stack Name.
+    MinLength: 3
+    MaxLength: 50
+    AllowedPattern: ^[A-Za-z_]+$
+    ConstraintDescription: 'Required. Can be characters and underscore only. No numbers or special characters allowed.'
+  ReadCapacityUnits:
+    Description: Provisioned read throughput
+    Type: Number
+    Default: 5
+    MinValue: 5
+    MaxValue: 10000
+    ConstraintDescription: must be between 5 and 10000
+  WriteCapacityUnits:
+    Description: Provisioned write throughput
+    Type: Number
+    Default: 5
+    MinValue: 5
+    MaxValue: 10000
+    ConstraintDescription: must be between 5 and 10000
+
 
 Resources:
   # API Gateway WebSocket API
@@ -48,25 +85,53 @@ Resources:
 #          - POST
 #      Target: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${LambdaFunction}/invocations
   # Lambda Function - uses Globals to define additional configuration values
-  LambdaFunction:
+  ConnectLambdaFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
       FunctionName: !Sub '${AppName}-connect-function'
       Handler: connect.handler
+      MemorySize: 256
 #      Role: !GetAtt FunctionExecutionRole.Arn
 #      # Example function environment variables
 #      Environment:
 #        Variables:
 #          Variable1: 1234
 #          Variable2: ABCD
-#  # Function permissions grant an AWS service or another account permission to use a function
-#  FunctionResourcePermission:
-#    Type: 'AWS::Lambda::Permission'
-#    Properties:
-#      Action: 'lambda:InvokeFunction'
-#      Principal: apigateway.amazonaws.com
-#      FunctionName: !Ref LambdaFunction
+  # Function permissions grant an AWS service or another account permission to use a function
+  ConnectFunctionResourcePermission:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      Principal: apigateway.amazonaws.com
+      FunctionName: !Ref ConnectLambdaFunction
 #      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*'
+
+  ConnectIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref WebsocketApi
+      Description: Connect Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri: 
+        Fn::Sub:
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ConnectLambdaFunction.Arn}/invocations
+
+  WebsocketConnectionsTableName:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: connectionId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: connectionId
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: !Ref ReadCapacityUnits
+        WriteCapacityUnits: !Ref WriteCapacityUnits
+      TableName: 
+        !Sub
+          - ${AWS::StackName}-${TableNameSuffix}
+          - { TableNameSuffix: !Ref WebsocketConnectionsTableNameSuffix }
 
 #Outputs:
 #  HttpApiEndpoint:

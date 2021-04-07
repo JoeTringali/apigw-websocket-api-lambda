@@ -10,20 +10,34 @@ Globals:
     MemorySize: 128
     Timeout: 15
 
-#Parameters:
-#  AppName:
-#    Description: Name of Application
-#    Type: String
-#    Default: apigw-http-api-lambda
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label: 
+          default: "Application Configuration"
+        Parameters:
+          - AppName
+    ParameterLabels:
+      AppName:
+        default: Application Name
+
+
+Parameters:
+  AppName:
+    Description: >
+      The name of the application
+    Type: String
+    Default: apigw-http-api-lambda
 
 Resources:
-  # API Gateway HTTP API
-  HttpApi:
+  # API Gateway WebSocket API
+  WebsocketApi:
     Type: 'AWS::ApiGatewayV2::Api'
-#    Properties:
-#      Name: !Ref AppName
-#      Description: An Amazon API Gateway HTTP API and an AWS Lambda function.
-#      ProtocolType: HTTP
+    Properties:
+      Name: !Ref AppName
+      Description: An Amazon API Gateway Websocket API and an AWS Lambda function.
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: "$request.body.action"
 #      CorsConfiguration:
 #        AllowOrigins:
 #          - '*'

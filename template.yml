@@ -105,7 +105,6 @@ Resources:
       Principal: apigateway.amazonaws.com
       FunctionName: !Ref ConnectLambdaFunction
 #      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*'
-
   ConnectIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
@@ -115,7 +114,17 @@ Resources:
       IntegrationUri: 
         Fn::Sub:
             arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ConnectLambdaFunction.Arn}/invocations
-
+  ConnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref WebsocketApi
+      RouteKey: $connect
+      AuthorizationType: NONE
+      OperationName: ConnectRoute
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref ConnectIntegration
   WebsocketConnectionsTableName:
     Type: AWS::DynamoDB::Table
     Properties:

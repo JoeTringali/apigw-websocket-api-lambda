@@ -47,12 +47,12 @@ Resources:
 #          - OPTIONS
 #          - POST
 #      Target: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${LambdaFunction}/invocations
-#  # Lambda Function - uses Globals to define additional configuration values
-#  LambdaFunction:
-#    Type: 'AWS::Serverless::Function'
-#    Properties:
-#      FunctionName: !Sub '${AppName}-function'
-#      Handler: app.handler
+  # Lambda Function - uses Globals to define additional configuration values
+  LambdaFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: !Sub '${AppName}-connect-function'
+      Handler: connect.handler
 #      Role: !GetAtt FunctionExecutionRole.Arn
 #      # Example function environment variables
 #      Environment:

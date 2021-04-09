@@ -129,6 +129,12 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName: !Ref WebsocketConnectionsTableName
+      - Statement:
+        - Effect: Allow
+          Action:
+          - 'execute-api:ManageConnections'
+          Resource:
+          - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WebsocketApi}/*'
   # Function permissions grant an AWS service or another account permission to use a function
   PostFunctionResourcePermission:
     Type: 'AWS::Lambda::Permission'

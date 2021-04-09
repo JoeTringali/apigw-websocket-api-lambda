@@ -214,6 +214,21 @@ Resources:
         !Sub
           - ${AWS::StackName}-${TableNameSuffix}
           - { TableNameSuffix: !Ref WebsocketConnectionsTableNameSuffix }
+  Deployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    DependsOn:
+      - ConnectRoute
+      - PostRoute
+      - DisconnectRoute
+    Properties:
+      ApiId: !Ref WebsocketApi
+  Stage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      StageName: prod
+      Description: Prod Stage
+      DeploymentId: !Ref Deployment
+      ApiId: !Ref WebsocketApi
 
 Outputs:
   ConnectLambdaFunctionArn:
@@ -228,6 +243,9 @@ Outputs:
   WebsocketApiEndpoint:
     Description: The default endpoint for the Websocket API.
     Value: !GetAtt WebsocketApi.ApiEndpoint
+  WebSocketURL:
+    Description: "The WSS Protocol URL to connect to"
+    Value: !Join [ '', [ 'wss://', !Ref WebsocketApi, '.execute-api.',!Ref 'AWS::Region','.amazonaws.com/',!Ref 'Stage'] ]
   WebsocketConnectionsTableNameArn:
     Description: "Websocket connections table ARN"
     Value: !GetAtt WebsocketConnectionsTableName.Arn

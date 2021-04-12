@@ -76,11 +76,11 @@ Resources:
       ProtocolType: WEBSOCKET
       RouteSelectionExpression: "$request.body.action"
   # Lambda Function - uses Globals to define additional configuration values
-  ConnectLambdaFunction:
+  OnConnectLambdaFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
-      FunctionName: !Sub '${AppName}-connect-function'
-      Handler: connect.handler
+      FunctionName: !Sub '${AppName}-onconnect-function'
+      Handler: onconnect.handler
       MemorySize: 256
       Environment:
         Variables:
@@ -89,33 +89,33 @@ Resources:
       - DynamoDBCrudPolicy:
           TableName: !Ref WebsocketConnectionsTableName
   # Function permissions grant an AWS service or another account permission to use a function
-  ConnectFunctionResourcePermission:
+  OnConnectFunctionResourcePermission:
     Type: 'AWS::Lambda::Permission'
     Properties:
       Action: 'lambda:InvokeFunction'
       Principal: apigateway.amazonaws.com
-      FunctionName: !Ref ConnectLambdaFunction
+      FunctionName: !Ref OnConnectLambdaFunction
       SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WebsocketApi}/*'
-  ConnectIntegration:
+  OnConnectIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
       ApiId: !Ref WebsocketApi
-      Description: Connect Integration
+      Description: OnConnect Integration
       IntegrationType: AWS_PROXY
       IntegrationUri: 
         Fn::Sub:
-            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ConnectLambdaFunction.Arn}/invocations
-  ConnectRoute:
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OnConnectLambdaFunction.Arn}/invocations
+  OnConnectRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref WebsocketApi
       RouteKey: $connect
       AuthorizationType: NONE
-      OperationName: ConnectRoute
+      OperationName: OnConnectRoute
       Target: !Join
         - '/'
         - - 'integrations'
-          - !Ref ConnectIntegration
+          - !Ref OnConnectIntegration
   # Lambda Function - uses Globals to define additional configuration values
   PostLambdaFunction:
     Type: 'AWS::Serverless::Function'
@@ -164,11 +164,11 @@ Resources:
         - - 'integrations'
           - !Ref PostIntegration
   # Lambda Function - uses Globals to define additional configuration values
-  DisconnectLambdaFunction:
+  OnDisconnectLambdaFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
-      FunctionName: !Sub '${AppName}-disconnect-function'
-      Handler: disconnect.handler
+      FunctionName: !Sub '${AppName}-ondisconnect-function'
+      Handler: ondisconnect.handler
       MemorySize: 256
       Environment:
         Variables:
@@ -177,33 +177,33 @@ Resources:
       - DynamoDBCrudPolicy:
           TableName: !Ref WebsocketConnectionsTableName
   # Function permissions grant an AWS service or another account permission to use a function
-  DisconnectFunctionResourcePermission:
+  OnDisconnectFunctionResourcePermission:
     Type: 'AWS::Lambda::Permission'
     Properties:
       Action: 'lambda:InvokeFunction'
       Principal: apigateway.amazonaws.com
-      FunctionName: !Ref DisconnectLambdaFunction
+      FunctionName: !Ref OnDisconnectLambdaFunction
       SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WebsocketApi}/*'
-  DisconnectIntegration:
+  OnDisconnectIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
       ApiId: !Ref WebsocketApi
-      Description: Disconnect Integration
+      Description: OnDisconnect Integration
       IntegrationType: AWS_PROXY
       IntegrationUri: 
         Fn::Sub:
-            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DisconnectLambdaFunction.Arn}/invocations
-  DisconnectRoute:
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OnDisconnectLambdaFunction.Arn}/invocations
+  OnDisconnectRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref WebsocketApi
       RouteKey: $disconnect
       AuthorizationType: NONE
-      OperationName: DisconnectRoute
+      OperationName: OnDisconnectRoute
       Target: !Join
         - '/'
         - - 'integrations'
-          - !Ref DisconnectIntegration
+          - !Ref OnDisconnectIntegration
   WebsocketConnectionsTableName:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -223,9 +223,9 @@ Resources:
   Deployment:
     Type: AWS::ApiGatewayV2::Deployment
     DependsOn:
-      - ConnectRoute
+      - OnConnectRoute
       - PostRoute
-      - DisconnectRoute
+      - OnDisconnectRoute
     Properties:
       ApiId: !Ref WebsocketApi
   Stage:
@@ -237,12 +237,12 @@ Resources:
       ApiId: !Ref WebsocketApi
 
 Outputs:
-  ConnectLambdaFunctionArn:
-    Description: "Connect function ARN"
-    Value: !GetAtt ConnectLambdaFunction.Arn
-  DisconnectLambdaFunctionArn:
-    Description: "Disconnect function ARN"
-    Value: !GetAtt DisconnectLambdaFunction.Arn
+  OnConnectLambdaFunctionArn:
+    Description: "OnConnect function ARN"
+    Value: !GetAtt OnConnectLambdaFunction.Arn
+  OnDisconnectLambdaFunctionArn:
+    Description: "OnDisconnect function ARN"
+    Value: !GetAtt OnDisconnectLambdaFunction.Arn
   PostLambdaFunctionArn:
     Description: "Post function ARN"
     Value: !GetAtt PostLambdaFunction.Arn

@@ -20,22 +20,25 @@ Important: this application uses various AWS services and there are costs associ
     ``` bash
     git clone https://github.com/aws-samples/serverless-patterns
     ```
-2. Change directory to the pattern directory:
+
+1. Change directory to the pattern directory:
     ``` bash
     cd apigw-websocket-api-lambda
     ```
-3. From the command line, use AWS SAM to deploy the AWS resources for the pattern as specified in the template.yml file:
+
+1. From the command line, use AWS SAM to deploy the AWS resources for the pattern as specified in the template.yml file:
     ``` bash
     sam deploy --guided
     ```
-4. During the prompts:
+
+1. During the prompts:
     * Enter a stack name
     * Enter the desired AWS Region
     * Allow SAM CLI to create IAM roles with the required permissions.
 
     Once you have run `sam deploy -guided` mode once and saved arguments to a configuration file (samconfig.toml), you can use `sam deploy` in future to use these defaults.
 
-5. Note the outputs from the SAM deployment process. These contain the resource names and/or ARNs which are used for testing.
+1. Note the outputs from the SAM deployment process. These contain the resource names and/or ARNs which are used for testing.
 
 ## How it works
 
@@ -47,17 +50,17 @@ Once the application is deployed, retrieve the WebSocketURL value from CloudForm
 
 1. [Install NPM](https://www.npmjs.com/get-npm).
 
-2. Install wscat:
+1. Install wscat:
     ```
     $ npm install -g wscat
     ```
 
-3. Connect to your WebSocketURL by executing the following command:
+1. Connect to your WebSocketURL by executing the following command:
     ```
     $ wscat -c {YOUR-WEBSOCKET-URL}
     ```
 
-4. To test the custom route and its associated function, send a JSON-formatted request like the following example. The Lambda function sends back the value of the "data" key using the callback URL:
+1. To test the custom route and its associated function, send a JSON-formatted request like the following example. The Lambda function sends back the value of the "data" key using the callback URL:
 ```
 $ wscat -c {YOUR-WEBSOCKET-URL}
 connected (press CTRL+C to quit)
@@ -73,17 +76,17 @@ connected (press CTRL+C to quit)
 - [Function Environment Variables](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html)
 
 ## Cleanup
- 
-##########################
 
 1. Delete the stack
     ```
     aws cloudformation delete-stack --stack-name STACK_NAME
     ```
+
 1. Confirm the stack has been deleted
     ```
     aws cloudformation list-stacks --query "StackSummaries[?contains(StackName,'STACK_NAME')].StackStatus"
     ```
+
 ----
 Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 

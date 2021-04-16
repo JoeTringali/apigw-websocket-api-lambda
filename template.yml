@@ -13,10 +13,6 @@ Globals:
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
-      - Label: 
-          default: "Application Configuration"
-        Parameters:
-          - AppName
       - Label:
           default: "Amazon DynamoDB Configuration"
         Parameters:
@@ -24,8 +20,6 @@ Metadata:
           - ReadCapacityUnits
           - WriteCapacityUnits
     ParameterLabels:
-      AppName:
-        default: Application Name
       ReadCapacityUnits:
         default: Read Capacity Units
       WriteCapacityUnits:
@@ -35,11 +29,6 @@ Metadata:
 
 
 Parameters:
-  AppName:
-    Type: String
-    Default: apigw-http-api-lambda
-    Description: >
-      The name of the application
   WebSocketConnectionsTableNameSuffix:
     Type: String
     Default: 'websocket_connections'
@@ -71,7 +60,7 @@ Resources:
   WebSocketApi:
     Type: 'AWS::ApiGatewayV2::Api'
     Properties:
-      Name: !Ref AppName
+      Name: !Ref AWS::StackName
       Description: An Amazon API Gateway WebSocket API and an AWS Lambda function.
       ProtocolType: WEBSOCKET
       RouteSelectionExpression: "$request.body.action"
@@ -79,7 +68,7 @@ Resources:
   OnConnectLambdaFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
-      FunctionName: !Sub '${AppName}-onconnect-function'
+      FunctionName: !Sub '${AWS::StackName}-onconnect-function'
       Handler: onconnect.handler
       MemorySize: 256
       Environment:
@@ -120,7 +109,7 @@ Resources:
   PostLambdaFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
-      FunctionName: !Sub '${AppName}-post-function'
+      FunctionName: !Sub '${AWS::StackName}-post-function'
       Handler: post.handler
       MemorySize: 256
       Environment:
@@ -167,7 +156,7 @@ Resources:
   OnDisconnectLambdaFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
-      FunctionName: !Sub '${AppName}-ondisconnect-function'
+      FunctionName: !Sub '${AWS::StackName}-ondisconnect-function'
       Handler: ondisconnect.handler
       MemorySize: 256
       Environment:

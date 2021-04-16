@@ -22,7 +22,8 @@ exports.handler = async event => {
   const putParams = {
     TableName: process.env.TABLE_NAME,
     Item: {
-      connectionId: event.requestContext.connectionId
+      connectionId: event.requestContext.connectionId,
+      ttl:  parseInt((Date.now() / 1000) + 3600)
     }
   };
 

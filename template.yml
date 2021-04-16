@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: 'AWS::Serverless-2016-10-31'
-Description: An Amazon API Gateway Websocket API and an AWS Lambda function.
+Description: An Amazon API Gateway WebSocket API and an AWS Lambda function.
 
 # Global values that are applied to all applicable resources in this template
 Globals:
@@ -20,7 +20,7 @@ Metadata:
       - Label:
           default: "Amazon DynamoDB Configuration"
         Parameters:
-          - WebsocketConnectionsTableNameSuffix
+          - WebSocketConnectionsTableNameSuffix
           - ReadCapacityUnits
           - WriteCapacityUnits
     ParameterLabels:
@@ -30,8 +30,8 @@ Metadata:
         default: Read Capacity Units
       WriteCapacityUnits:
         default: Write Capacity Units
-      WebsocketConnectionsTableNameSuffix:
-        default: Websocket Connections Table Name Suffix
+      WebSocketConnectionsTableNameSuffix:
+        default: WebSocket Connections Table Name Suffix
 
 
 Parameters:
@@ -40,7 +40,7 @@ Parameters:
     Default: apigw-http-api-lambda
     Description: >
       The name of the application
-  WebsocketConnectionsTableNameSuffix:
+  WebSocketConnectionsTableNameSuffix:
     Type: String
     Default: 'websocket_connections'
     Description: >
@@ -68,11 +68,11 @@ Parameters:
 
 Resources:
   # API Gateway WebSocket API
-  WebsocketApi:
+  WebSocketApi:
     Type: 'AWS::ApiGatewayV2::Api'
     Properties:
       Name: !Ref AppName
-      Description: An Amazon API Gateway Websocket API and an AWS Lambda function.
+      Description: An Amazon API Gateway WebSocket API and an AWS Lambda function.
       ProtocolType: WEBSOCKET
       RouteSelectionExpression: "$request.body.action"
   # Lambda Function - uses Globals to define additional configuration values
@@ -84,10 +84,10 @@ Resources:
       MemorySize: 256
       Environment:
         Variables:
-          TABLE_NAME: !Ref WebsocketConnectionsTableName
+          TABLE_NAME: !Ref WebSocketConnectionsTableName
       Policies:
       - DynamoDBCrudPolicy:
-          TableName: !Ref WebsocketConnectionsTableName
+          TableName: !Ref WebSocketConnectionsTableName
   # Function permissions grant an AWS service or another account permission to use a function
   OnConnectFunctionResourcePermission:
     Type: 'AWS::Lambda::Permission'
@@ -95,11 +95,11 @@ Resources:
       Action: 'lambda:InvokeFunction'
       Principal: apigateway.amazonaws.com
       FunctionName: !Ref OnConnectLambdaFunction
-      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WebsocketApi}/*'
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WebSocketApi}/*'
   OnConnectIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
-      ApiId: !Ref WebsocketApi
+      ApiId: !Ref WebSocketApi
       Description: OnConnect Integration
       IntegrationType: AWS_PROXY
       IntegrationUri: 
@@ -108,7 +108,7 @@ Resources:
   OnConnectRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
-      ApiId: !Ref WebsocketApi
+      ApiId: !Ref WebSocketApi
       RouteKey: $connect
       AuthorizationType: NONE
       OperationName: OnConnectRoute
@@ -125,16 +125,16 @@ Resources:
       MemorySize: 256
       Environment:
         Variables:
-          TABLE_NAME: !Ref WebsocketConnectionsTableName
+          TABLE_NAME: !Ref WebSocketConnectionsTableName
       Policies:
       - DynamoDBCrudPolicy:
-          TableName: !Ref WebsocketConnectionsTableName
+          TableName: !Ref WebSocketConnectionsTableName
       - Statement:
         - Effect: Allow
           Action:
           - 'execute-api:ManageConnections'
           Resource:
-          - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WebsocketApi}/*'
+          - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WebSocketApi}/*'
   # Function permissions grant an AWS service or another account permission to use a function
   PostFunctionResourcePermission:
     Type: 'AWS::Lambda::Permission'
@@ -142,11 +142,11 @@ Resources:
       Action: 'lambda:InvokeFunction'
       Principal: apigateway.amazonaws.com
       FunctionName: !Ref PostLambdaFunction
-      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WebsocketApi}/*'
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WebSocketApi}/*'
   PostIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
-      ApiId: !Ref WebsocketApi
+      ApiId: !Ref WebSocketApi
       Description: Post Integration
       IntegrationType: AWS_PROXY
       IntegrationUri: 
@@ -155,7 +155,7 @@ Resources:
   PostRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
-      ApiId: !Ref WebsocketApi
+      ApiId: !Ref WebSocketApi
       RouteKey: post
       AuthorizationType: NONE
       OperationName: PostRoute
@@ -172,10 +172,10 @@ Resources:
       MemorySize: 256
       Environment:
         Variables:
-          TABLE_NAME: !Ref WebsocketConnectionsTableName
+          TABLE_NAME: !Ref WebSocketConnectionsTableName
       Policies:
       - DynamoDBCrudPolicy:
-          TableName: !Ref WebsocketConnectionsTableName
+          TableName: !Ref WebSocketConnectionsTableName
   # Function permissions grant an AWS service or another account permission to use a function
   OnDisconnectFunctionResourcePermission:
     Type: 'AWS::Lambda::Permission'
@@ -183,11 +183,11 @@ Resources:
       Action: 'lambda:InvokeFunction'
       Principal: apigateway.amazonaws.com
       FunctionName: !Ref OnDisconnectLambdaFunction
-      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WebsocketApi}/*'
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WebSocketApi}/*'
   OnDisconnectIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
-      ApiId: !Ref WebsocketApi
+      ApiId: !Ref WebSocketApi
       Description: OnDisconnect Integration
       IntegrationType: AWS_PROXY
       IntegrationUri: 
@@ -196,7 +196,7 @@ Resources:
   OnDisconnectRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
-      ApiId: !Ref WebsocketApi
+      ApiId: !Ref WebSocketApi
       RouteKey: $disconnect
       AuthorizationType: NONE
       OperationName: OnDisconnectRoute
@@ -204,7 +204,7 @@ Resources:
         - '/'
         - - 'integrations'
           - !Ref OnDisconnectIntegration
-  WebsocketConnectionsTableName:
+  WebSocketConnectionsTableName:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
@@ -219,7 +219,7 @@ Resources:
       TableName: 
         !Sub
           - ${AWS::StackName}-${TableNameSuffix}
-          - { TableNameSuffix: !Ref WebsocketConnectionsTableNameSuffix }
+          - { TableNameSuffix: !Ref WebSocketConnectionsTableNameSuffix }
   Deployment:
     Type: AWS::ApiGatewayV2::Deployment
     DependsOn:
@@ -227,14 +227,14 @@ Resources:
       - PostRoute
       - OnDisconnectRoute
     Properties:
-      ApiId: !Ref WebsocketApi
+      ApiId: !Ref WebSocketApi
   Stage:
     Type: AWS::ApiGatewayV2::Stage
     Properties:
       StageName: prod
       Description: Prod Stage
       DeploymentId: !Ref Deployment
-      ApiId: !Ref WebsocketApi
+      ApiId: !Ref WebSocketApi
 
 Outputs:
   OnConnectLambdaFunctionArn:
@@ -246,12 +246,9 @@ Outputs:
   PostLambdaFunctionArn:
     Description: "Post function ARN"
     Value: !GetAtt PostLambdaFunction.Arn
-  WebsocketApiEndpoint:
-    Description: The default endpoint for the Websocket API.
-    Value: !GetAtt WebsocketApi.ApiEndpoint
   WebSocketURL:
     Description: "The WSS Protocol URL to connect to"
-    Value: !Join [ '', [ 'wss://', !Ref WebsocketApi, '.execute-api.',!Ref 'AWS::Region','.amazonaws.com/',!Ref 'Stage'] ]
-  WebsocketConnectionsTableNameArn:
-    Description: "Websocket connections table ARN"
-    Value: !GetAtt WebsocketConnectionsTableName.Arn
+    Value: !Join [ '', [ 'wss://', !Ref WebSocketApi, '.execute-api.',!Ref 'AWS::Region','.amazonaws.com/',!Ref 'Stage'] ]
+  WebSocketConnectionsTableNameArn:
+    Description: "WebSocket connections table ARN"
+    Value: !GetAtt WebSocketConnectionsTableName.Arn

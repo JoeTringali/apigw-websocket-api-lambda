@@ -57,12 +57,12 @@ Once the application is deployed, retrieve the WebSocketURL value from CloudForm
 
 1. Connect to your WebSocketURL by executing the following command:
     ```
-    $ wscat -c {YOUR-WEBSOCKET-URL}
+    $ wscat -c <YOUR WEBSOCKET URL>
     ```
 
 1. To test the custom route and its associated function, send a JSON-formatted request like the following example. The Lambda function sends back the value of the "data" key using the callback URL:
 ```
-$ wscat -c {YOUR-WEBSOCKET-URL}
+$ wscat -c <YOUR WEBSOCKET URL>
 connected (press CTRL+C to quit)
 > {"action":"post", "data":"hello world"}
 < hello world
@@ -79,12 +79,12 @@ connected (press CTRL+C to quit)
 
 1. Delete the stack
     ```
-    aws cloudformation delete-stack --stack-name STACK_NAME
+    aws cloudformation delete-stack --stack-name <YOUR STACK NAME>
     ```
 
 1. Confirm the stack has been deleted
     ```
-    aws cloudformation list-stacks --query "StackSummaries[?contains(StackName,'STACK_NAME')].StackStatus"
+    aws cloudformation list-stacks --query "StackSummaries[?contains(StackName,'<YOUR STACK NAME>')].StackStatus"
     ```
 
 ----
